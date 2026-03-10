@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/ybuilds/ystream/backend/controllers"
+	"github.com/ybuilds/ystream/backend/database"
 	"github.com/ybuilds/ystream/backend/utils"
 )
 
@@ -15,6 +16,13 @@ func main() {
 	err := utils.LoadEnv()
 	if err != nil {
 		log.Fatalln("error loading .env file", err)
+	}
+
+	fmt.Println("loading database connection")
+
+	err = database.LoadDb()
+	if err != nil {
+		log.Fatalln("error loading database connection", err)
 	}
 
 	fmt.Println("started ystream backend service...")

@@ -1,25 +1,43 @@
 package database
 
 import (
-	"database/sql"
+	"context"
 	"log"
+
+	"github.com/ybuilds/ystream/backend/utils"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	_ "go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-var db *sql.DB
+var db *mongo.Database
 
-func init() {
-	var err error
+func getDb() *mongo.Database {
+	return db
+}
 
-	db, err = sql.Open("mongo", "")
+func LoadDb() error {
+	dbUri, err := utils.GetEnvValue("DB_URI")
 	if err != nil {
-		log.Fatalln("error open database", err)
+		log.Println("error fetcing database uri, setting to fallback localhost uri")
+		dbUri = "mongodb://localhost:27017/ystream"
 	}
 
-	err = db.Ping()
+	clientOptions := options.Client().ApplyURI(dbUri)
+
+	client, err := mongo.Connect(clientOptions)
 	if err != nil {
-		log.Fatalln("error pinging database", err)
+		log.Println("error creating database connection")
+		return err
 	}
 
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(5)
+	err = client.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Println("error pinging database")
+		return err
+	}
+
+	db = client.Database("ystream")
+
+	return nil
 }
