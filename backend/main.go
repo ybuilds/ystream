@@ -5,9 +5,10 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ybuilds/ystream/backend/controllers"
-	"github.com/ybuilds/ystream/backend/database"
-	"github.com/ybuilds/ystream/backend/utils"
+	controller "github.com/ybuilds/ystream/backend/controllers"
+	db "github.com/ybuilds/ystream/backend/database"
+	route "github.com/ybuilds/ystream/backend/routes"
+	utils "github.com/ybuilds/ystream/backend/utils"
 )
 
 func main() {
@@ -20,7 +21,7 @@ func main() {
 
 	fmt.Println("loading database connection")
 
-	err = database.LoadDb()
+	err = db.LoadDb()
 	if err != nil {
 		log.Fatalln("error loading database connection", err)
 	}
@@ -29,7 +30,9 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("/health-check", controllers.HealthCheck)
+	router.GET("/health-check", controller.HealthCheck)
+
+	route.MovieRoute(router)
 
 	err = router.Run("localhost:8000")
 	if err != nil {

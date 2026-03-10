@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/ybuilds/ystream/backend/utils"
@@ -10,11 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-var db *mongo.Database
-
-func getDb() *mongo.Database {
-	return db
-}
+var DB *mongo.Database
 
 func LoadDb() error {
 	dbUri, err := utils.GetEnvValue("DB_URI")
@@ -37,7 +34,16 @@ func LoadDb() error {
 		return err
 	}
 
-	db = client.Database("ystream")
+	DB = client.Database("ystream")
 
 	return nil
+}
+
+func GetCollection(collectionName string) (*mongo.Collection, error) {
+	collection := DB.Collection(collectionName)
+	if collection == nil {
+		return nil, errors.New("unable to find collection " + collectionName)
+	}
+
+	return collection, nil
 }
